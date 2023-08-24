@@ -22,7 +22,7 @@
         cout<<d.trainIdx<<" "<<d.queryIdx<<endl;
     }
 
-//kdtree的用法；注意！！！vector<Index*>只能存放指針對象，因爲禁用了拷贝构造；同时入参input不能被析构，否则出错
+    //kdtree的用法；注意！！！vector<Index*>只能存放指針對象，因爲禁用了拷贝构造；同时入参input不能被析构，否则出错
     vector<shared_ptr<cv::flann::Index>> trees(node_num+1);
     vector<cv::Mat>cont_pts_vec;
     for(int i =0;i<=node_num;i++){
@@ -42,6 +42,15 @@
     vector<float>vecDist(1);
     float minDis{FLT_MAX};
     for(int i =0;i<=node_num;i++){trees[i]->knnSearch(cont_pts_vec[j].row(idx), vecIndex, vecDist, 1);}
+
+    //暴力匹配
+    Mat c1 = Mat(Contours[i]).reshape(1,(int)Contours[i].size());
+    c1.convertTo(c1,CV_32F);
+    Mat c2 = Mat(Contours[j]).reshape(1,(int)Contours[j].size());
+    c2.convertTo(c2,CV_32F);
+    Mat dst,nidx;
+    batchDistance(c1,c2,dst,CV_32F,nidx,NORM_L2, 1, Mat(), 0, true);
+    auto it = min_element(dst.begin<float>(),dst.end<float>());
     
 
     
