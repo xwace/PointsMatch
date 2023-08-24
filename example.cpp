@@ -22,4 +22,26 @@
         cout<<d.trainIdx<<" "<<d.queryIdx<<endl;
     }
 
+//kdtree的用法；注意！！！vector<Index*>只能存放指針對象，因爲禁用了拷贝构造；同时入参input不能被析构，否则出错
+    vector<shared_ptr<cv::flann::Index>> trees(node_num+1);
+    vector<cv::Mat>cont_pts_vec;
+    for(int i =0;i<=node_num;i++){
+        Mat c = Mat(Contours[i]).reshape(1,(int)Contours[i].size());
+        c.convertTo(c,CV_32F);
+        cont_pts_vec.emplace_back(c.clone());//发生move?
+    }
+
+    for(int i =0;i<=node_num;i++){
+
+        cv::flann::KDTreeIndexParams indexParamsPtr(cont_pts_vec[i].cols);  // 设置数据维度 in_mat.cols
+        auto kdtreePtr = make_shared<cv::flann::Index>(cont_pts_vec[i], indexParamsPtr);
+        trees[i] = kdtreePtr;//无法存放禁用赋值的对象实例
+    }
+
+    vector<int>vecIndex(1);
+    vector<float>vecDist(1);
+    float minDis{FLT_MAX};
+    for(int i =0;i<=node_num;i++){trees[i]->knnSearch(cont_pts_vec[j].row(idx), vecIndex, vecDist, 1);}
+    
+
     
